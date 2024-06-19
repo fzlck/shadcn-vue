@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "createdBy": null,
+    "createdDate": null,
+    "lastModifiedBy": null,
+    "lastModifiedDate": null,
+    "category": "WORKFLOW",
+    "name": "stairliftOrder"
+  },
+  {
+    "id": 3,
+    "createdBy": null,
+    "createdDate": null,
+    "lastModifiedBy": null,
+    "lastModifiedDate": null,
+    "category": "WORKFLOW_ITEM",
+    "name": "hw10"
+  }
+]
