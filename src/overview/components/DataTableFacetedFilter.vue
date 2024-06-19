@@ -22,14 +22,18 @@ import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
 import {Separator} from '@/components/ui/separator';
 import {cn} from '@/lib/utils';
 
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
+interface Option {
+  label: string,
+  value: string,
+  icon?: Component
+}
 interface DataTableFacetedFilter {
   column?: Column<Order, any>;
   title?: string;
-  options?: {
-    label: string;
-    value: string;
-    icon?: Component;
-  }[];
+  options?: Option[];
 }
 
 const props = defineProps<DataTableFacetedFilter>();
@@ -45,7 +49,7 @@ const selectedValues = computed(
     <PopoverTrigger as-child>
       <Button variant="outline" size="sm" class="h-8 border-dashed">
         <PlusCircledIcon class="mr-2 h-4 w-4" />
-        {{ title }}
+        {{ t(title as string) || 'Select' }}
         <template v-if="selectedValues.size > 0">
           <Separator orientation="vertical" class="mx-2 h-4" />
           <Badge
@@ -60,7 +64,7 @@ const selectedValues = computed(
               variant="secondary"
               class="rounded-sm px-1 font-normal"
             >
-              {{ selectedValues.size }} selected
+              {{ selectedValues.size }} {{t('selected')}}
             </Badge>
 
             <template v-else>
@@ -81,11 +85,11 @@ const selectedValues = computed(
     </PopoverTrigger>
     <PopoverContent class="w-[200px] p-0" align="start">
       <Command
-        :filter-function="(list: DataTableFacetedFilter['options'], term) => list?.filter(i => i.label.toLowerCase()?.includes(term))"
+        :filter-function="(list: any[], term) =>  (list as Option[]).filter(i => i.label.toLowerCase()?.includes(term))"
       >
-        <CommandInput :placeholder="title" />
+        <CommandInput :placeholder="t(title as string) || 'Select'" />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>{{ t('no_results_found') }}</CommandEmpty>
           <CommandGroup>
             <CommandItem
               v-for="option in options"
@@ -142,7 +146,7 @@ const selectedValues = computed(
                 class="justify-center text-center"
                 @select="column?.setFilterValue(undefined)"
               >
-                Clear filters
+                {{ t('clear_filters') }}
               </CommandItem>
             </CommandGroup>
           </template>

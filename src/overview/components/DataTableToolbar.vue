@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import type { Table } from '@tanstack/vue-table'
-import { computed } from 'vue'
 import type { Order } from '../data/schema'
 
-import { priorities, statuses, dealers } from '../data/data'
+import { statuses, dealers } from '../data/data'
 import DataTableFacetedFilter from './DataTableFacetedFilter.vue'
 import DataTableViewOptions from './DataTableViewOptions.vue'
-// import Cross2Icon from '~icons/radix-icons/cross-2'
 import { Cross2Icon } from '@radix-icons/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import OrderDetailsForm from './OrderDetailsForm.vue'
+
+import { computed } from 'vue'
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 interface DataTableToolbarProps {
   table: Table<Order>
 }
-
 const props = defineProps<DataTableToolbarProps>()
+
+const { t } = useI18n();
+const router = useRouter();
 
 const isFiltered = computed(() => props.table.getState().columnFilters.length > 0)
 
@@ -24,6 +29,7 @@ const isFiltered = computed(() => props.table.getState().columnFilters.length > 
 
 <template>
   <div class="flex items-center justify-between">
+    <Button variant="outline" class="shadow-md" @click="router.push('/new-order')">{{ t('new_order') }}</Button>
     <div class="flex flex-1 items-center space-x-2">
       <!-- <Input
         placeholder="Filter Com_No"
@@ -31,24 +37,24 @@ const isFiltered = computed(() => props.table.getState().columnFilters.length > 
         class="h-8 w-[100px] lg:w-[150px]"
         @input="table.getColumn('com_no')?.setFilterValue($event.target.value)"
       /> -->
-      <DataTableFacetedFilter
+      <!-- <DataTableFacetedFilter
         v-if="table.getColumn('status')"
         :column="table.getColumn('status')"
         title="Status"
         :options="statuses"
-      />
+      /> -->
       <!-- <Input
         placeholder="Filter Order Date"
         :model-value="(table.getColumn('order_date')?.getFilterValue() as string) ?? ''"
         class="h-8 w-[100px] lg:w-[150px]"
         @input="table.getColumn('order_date')?.setFilterValue($event.target.value)"
       /> -->
-      <DataTableFacetedFilter
+      <!-- <DataTableFacetedFilter
         v-if="table.getColumn('dealer')"
         :column="table.getColumn('dealer')"
         title="Dealer"
         :options="dealers"
-      />
+      /> -->
       <!-- <Input
         placeholder="Filter Last Status"
         :model-value="(table.getColumn('last_status')?.getFilterValue() as string) ?? ''"
@@ -86,7 +92,7 @@ const isFiltered = computed(() => props.table.getState().columnFilters.length > 
         @input="table.getColumn('planned_delivery_week')?.setFilterValue($event.target.value)"
       /> -->
 
-      <Button
+      <!-- <Button
         v-if="isFiltered"
         variant="ghost"
         class="h-8 px-2 lg:px-3"
@@ -94,7 +100,7 @@ const isFiltered = computed(() => props.table.getState().columnFilters.length > 
       >
         Reset
         <Cross2Icon class="ml-2 h-4 w-4" />
-      </Button>
+      </Button> -->
     </div>
     <!-- <DataTableViewOptions :table="table" /> -->
   </div>

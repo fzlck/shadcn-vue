@@ -16,13 +16,13 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 
-import {ref} from 'vue';
-import type {Order} from '../data/schema';
+import { ref } from 'vue';
+import type { Order } from '../data/schema';
 
 import DataTablePagination from './DataTablePagination.vue';
 import DataTableFacetedFilter from './DataTableFacetedFilter.vue';
 
-import {valueUpdater} from '@/lib/utils';
+import { valueUpdater, cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -31,12 +31,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {Input} from '@/components/ui/input';
-
+import { Input } from '@/components/ui/input';
+import WeekFilter from './WeekFilter.vue';
+import DataTableToolbar from './DataTableToolbar.vue';
 
 interface DataTableProps {
-  columns: ColumnDef<Order, any>[];
-  data: Order[];
+  columns: ColumnDef<any>[];
+  data: any[];
 }
 const props = defineProps<DataTableProps>();
 
@@ -83,25 +84,44 @@ const table = useVueTable({
 });
 
 console.log(table.getHeaderGroups());
-import CalendarWithSelect from './CalendarWithSelect.vue';
+
+const selectedYear = ref('');
+const selectedWeek = ref('');
+const handleWeekUpdate = (week: string) => {
+  if (week === '-') {
+    selectedWeek.value = '';
+  } else {
+    selectedWeek.value = week;
+  }
+  table.getColumn('planned_delivery_week')?.setFilterValue(`${selectedYear.value}-${selectedWeek.value}`)
+};
+const handleYearUpdate = (year: string) => {
+  if (year === '-') {
+    selectedYear.value = '';
+  } else {
+    selectedYear.value = year;
+  }
+  table.getColumn('planned_delivery_week')?.setFilterValue(`${selectedYear.value}-${selectedWeek.value}`)
+};
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="rounded-md border">
-      <div class="h-[78vh] relative overflow-auto">
+  <div class="space-y-2">
+    <DataTableToolbar :table="table"/>
+    <div class="rounded-md border-dark">
+      <div class="h-[75vh] relative overflow-auto rounded-md">
         <Table>
-          <TableHeader class="sticky z-20 top-0 bg-slate-100">
+          <TableHeader class="sticky z-20 top-0">
             <TableRow
               v-for="headerGroup in table.getHeaderGroups()"
               :key="headerGroup.id"
             >
-              <TableHead v-for="header in headerGroup.headers" :key="header.id">
+              <TableHead v-for="header in headerGroup.headers" :key="header.id" :class="cn(header.column.columnDef.meta?.sticky ?? '', 'bg-slate-800')">
                 <FlexRender
                   v-if="!header.isPlaceholder"
                   :render="header.column.columnDef.header"
                   :props="header.getContext()"
-                  class="mt-1"
+                  class="mt-1 text-[#E0E4EE]"
                 />
                 <div class="my-2">
                   <template
@@ -116,6 +136,9 @@ import CalendarWithSelect from './CalendarWithSelect.vue';
                       :options="header.column.columnDef.meta?.options"
                     />
                   </template>
+                  <template v-else-if="header.column.columnDef.meta?.filterVariant === 'week'">
+                    <WeekFilter @update:year="handleYearUpdate" @update:week="handleWeekUpdate"/>
+                  </template>
                   <template v-else>
                     <Input
                       class="h-8"
@@ -124,33 +147,7 @@ import CalendarWithSelect from './CalendarWithSelect.vue';
                       :type="
                         header.column.columnDef.meta?.filterVariant || 'text'
                       "
-                      @input="
-                        if (header.column.columnDef.meta?.filterVariant === 'week') {
-                          let week = $event.target.value
-                          if (week === '') {
-                            table.getColumn(header.id)?.setFilterValue('')
-                          }
-                          if (week) {
-                            const weekRegex = /^(\d{4})-W(\d{1,2})$/
-                            const isValidWeekFormat = week.match(weekRegex)
-                            if (isValidWeekFormat) {
-                              table.getColumn(header.id)?.setFilterValue(week)
-                            } else {
-                              const otherWeekRegex = /^(\d{4})-?(\d{1,2})$/
-                              const match = week.match(otherWeekRegex);
-                              if (match !== null) {
-                                const [, year, weekNum] = match;
-                                const validWeek = `${year}-W${weekNum}`;
-                                table.getColumn(header.id)?.setFilterValue(validWeek);
-                              }
-                            }
-                          }
-                        } else {
-                          table
-                            .getColumn(header.id)
-                            ?.setFilterValue($event.target.value)
-                        }
-                      "
+                      @input="table.getColumn(header.id)?.setFilterValue($event.target.value)"
                     />
                   </template>
                 </div>
@@ -164,7 +161,7 @@ import CalendarWithSelect from './CalendarWithSelect.vue';
                 :key="row.id"
                 :data-state="row.getIsSelected() && 'selected'"
               >
-                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id" :class="cn(cell.column.columnDef.meta?.sticky ?? '')">
                   <FlexRender
                     :render="cell.column.columnDef.cell"
                     :props="cell.getContext()"
@@ -175,7 +172,7 @@ import CalendarWithSelect from './CalendarWithSelect.vue';
 
             <TableRow v-else>
               <TableCell :colspan="columns.length" class="h-24 text-center"
-                >No results.</TableCell
+                >{{ $t('no_results') }}</TableCell
               >
             </TableRow>
           </TableBody>
@@ -183,6 +180,6 @@ import CalendarWithSelect from './CalendarWithSelect.vue';
       </div>
     </div>
 
-    <DataTablePagination :table="table" />
+    <DataTablePagination :selectable="true" :table="table" />
   </div>
 </template>

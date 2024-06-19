@@ -1,37 +1,44 @@
 <script setup lang="ts">
-import tasks from './data/tasks.json'
-import DataTable from './components/DataTable.vue'
-// import UserNav from './components/UserNav.vue'
+import { onMounted  } from 'vue';
+import DataTable from './components/DataTable.vue';
 import { columns } from './components/columns';
+import { Skeleton } from '@/components/ui/skeleton';
 
+
+import { useWorkflowStore } from '@/stores/workflowStore';
+const store = useWorkflowStore();
+
+onMounted(async () => {
+  store.fetchWorkflows();
+});
 </script>
 
 <template>
-  <!-- <div class="md:hidden">
-    <VPImage
-      alt="Tasks"
-      width="1280"
-      height="1214" class="block" :image="{
-        dark: '/examples/tasks-dark.png',
-        light: '/examples/tasks-light.png',
-      }"
-    />
-  </div> -->
-
-  <div class="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
-    <div class="flex items-center justify-between space-y-2">
+  <div class="flex-1 flex-col space-y-6 p-6 md:flex">
+    <div class="flex items-center justify-between space-y-0">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight">
-          Orders - Overview 
-        </h2>
-        <!-- <p class="text-muted-foreground">
-          Here&apos;s a list of your tasks for this month!
-        </p> -->
+        <h1 class="text-2xl font-bold tracking-tight text-slate-800">
+          {{ $t('order', 2) }} - {{ $t('overview') }}
+        </h1>
       </div>
-      <!-- <div class="flex items-center space-x-2">
-        <UserNav />
-      </div> -->
     </div>
-    <DataTable :data="tasks" :columns="columns" />
+    <DataTable v-if="!store.loading" :data="store.workflows" :columns="columns" />
+    <div v-else>
+      <Skeleton class="h-10 w-32 bg-slate-400"/>
+      <div class="grid grid-cols-9 gap-4 mt-2 mb-8">
+        <Skeleton class="h-6 w-10 bg-slate-400"/>
+        <Skeleton class="h-6 w-24 bg-slate-400"/>
+        <Skeleton class="h-6 w-20 bg-slate-400"/>
+        <Skeleton class="h-6 w-32 bg-slate-400"/>
+        <Skeleton class="h-6 w-20 bg-slate-400"/>
+        <Skeleton class="h-6 w-32 bg-slate-400"/>
+        <Skeleton class="h-6 w-20 bg-slate-400"/>
+        <Skeleton class="h-6 w-20 bg-slate-400"/>
+        <Skeleton class="h-6 w-32 bg-slate-400"/>
+      </div>
+      <div class="grid grid-cols-9 gap-8">
+        <Skeleton v-for="cell in 90" :key="cell" class="h-6 bg-slate-400" />
+      </div>
+    </div>
   </div>
 </template>
